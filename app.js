@@ -1,6 +1,28 @@
 // GitHub username
-const GITHUB_USERNAME = 'BotCoder254';
-const BACKEND_URL = 'https://portfolio-backend-a8cx.onrender.com';
+const GITHUB_USERNAME = 'dev-mavenke';
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mvzdlzla';
+
+function githubApiUrl(path) {
+    return `https://api.github.com${path}`;
+}
+
+async function fetchGitHubJson(path) {
+    const response = await fetch(githubApiUrl(path), {
+        headers: {
+            'Accept': 'application/vnd.github+json'
+        }
+    });
+
+    if (!response.ok) {
+        if (response.status === 403) {
+            throw new Error('GitHub API rate limit reached. Please try again later.');
+        }
+
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+}
 
 // Current page for projects pagination
 let currentPage = 1;
@@ -37,13 +59,7 @@ function typeWriter(text, element, speed = 100) {
 async function fetchGitHubUser(retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/github/user`);
-            
-            if (!response.ok) {
-                throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
-            }
-            
-            const userData = await response.json();
+            const userData = await fetchGitHubJson(`/users/${GITHUB_USERNAME}`);
             
             // Update bio content
             const bioElement = getElement('bio-content');
@@ -100,8 +116,7 @@ async function fetchGitHubUser(retries = 3) {
 // Fetch GitHub repositories
 async function fetchGitHubRepos(page = 1, filter = 'all') {
     try {
-        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=${projectsPerPage}&page=${page}`);
-        const repos = await response.json();
+        const repos = await fetchGitHubJson(`/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=${projectsPerPage}&page=${page}`);
         
         const projectsGrid = document.getElementById('projects-grid');
         if (page === 1) {
@@ -204,13 +219,7 @@ async function fetchGitHubStats() {
 async function fetchAllRepositories(retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/github/repos`);
-            
-            if (!response.ok) {
-                throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
-            }
-            
-            const allRepos = await response.json();
+            const allRepos = await fetchGitHubJson(`/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
             
             if (allRepos.length === 0) {
                 throw new Error('No repositories found');
@@ -317,7 +326,7 @@ function getLanguageIcon(language) {
 // Show toast message
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
-    toast.className = 'toast toast-end';
+    toast.className = 'toast toast-end app-toast';
     toast.innerHTML = `
         <div class="alert alert-${type}">
             <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
@@ -580,25 +589,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                         throw new Error('Please fill in all required fields');
                     }
                     
-                    const response = await fetch(`${BACKEND_URL}/api/contact`, {
+                    const response = await fetch(FORMSPREE_ENDPOINT, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify(data)
                     });
                     
-                    const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
                     
                     if (!response.ok) {
-                        throw new Error(result.error || 'Failed to send message');
+                        throw new Error(result.errors?.[0]?.message || result.error || 'Failed to send message');
                     }
                     
                     showToast('Message sent successfully!', 'success');
                     e.target.reset();
                 } catch (error) {
                     console.error('Error sending message:', error);
-                    showToast(error.message || 'Failed to send message. Please try again.', 'error');
+                    const message = error instanceof TypeError
+                        ? 'Unable to reach Formspree. Check your connection or Formspree endpoint.'
+                        : (error.message || 'Failed to send message. Please try again.');
+                    showToast(message, 'error');
                 } finally {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
