@@ -8,23 +8,11 @@
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
-            "dest": "https://portfolio-backend-8q07.onrender.com/api/$1",
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept"
-            }
-        },
-        {
             "src": "/(.*)",
             "dest": "/index.html"
         }
     ],
-    "env": {
-        "BACKEND_URL": "https://portfolio-backend-8q07.onrender.com"
-    },
     "git": {
         "submodules": false
     }
-} 
+}
