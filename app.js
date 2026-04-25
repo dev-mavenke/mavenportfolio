@@ -1,6 +1,9 @@
 // GitHub username
-const GITHUB_USERNAME = 'dev-mavenke';
+const GITHUB_USERNAME = 'BotCoder254';
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mvzdlzla';
+const DISPLAY_FOLLOWERS_COUNT = 109;
+const DISPLAY_STARS_COUNT = 84;
+const DISPLAY_LOCATION = '';
 
 function githubApiUrl(path) {
     return `https://api.github.com${path}`;
@@ -26,7 +29,7 @@ async function fetchGitHubJson(path) {
 
 // Current page for projects pagination
 let currentPage = 1;
-const projectsPerPage = 6;
+const projectsPerPage = 84;
 let currentFilter = 'all';
 let currentSort = 'stars';
 let totalStarsCount = 0;
@@ -73,14 +76,14 @@ async function fetchGitHubUser(retries = 3) {
                                     <i class="fas fa-map-marker-alt text-2xl"></i>
                                 </div>
                                 <div class="stat-title">Location</div>
-                                <div class="stat-value text-sm">${userData.location || 'Kenya'}</div>
+                                <div class="stat-value text-sm">${DISPLAY_LOCATION}</div>
                             </div>
                             <div class="stat">
                                 <div class="stat-figure text-secondary">
                                     <i class="fas fa-users text-2xl"></i>
                                 </div>
                                 <div class="stat-title">Followers</div>
-                                <div class="stat-value text-sm">${userData.followers}</div>
+                                <div class="stat-value text-sm">${DISPLAY_FOLLOWERS_COUNT}</div>
                             </div>
                             <div class="stat">
                                 <div class="stat-figure text-accent">
@@ -97,7 +100,7 @@ async function fetchGitHubUser(retries = 3) {
             // Update stats
             updateElementText('projects-count', userData.public_repos || 0);
             updateElementText('projects-desc', `Last updated ${new Date(userData.updated_at).toLocaleDateString()}`);
-            updateElementText('followers-count', userData.followers || 0);
+            updateElementText('followers-count', DISPLAY_FOLLOWERS_COUNT);
             updateElementText('followers-desc', 'GitHub Followers');
             
             return userData;
@@ -529,8 +532,9 @@ function displayProjects(repos, clearGrid = true) {
     
     // Update featured stats safely
     updateElementText('featured-projects-count', Math.min(repos.length, projectsPerPage * currentPage));
-    updateElementText('featured-stars-count', repos.reduce((acc, repo) => acc + repo.stargazers_count, 0));
-    updateElementText('total-stars', repos.reduce((acc, repo) => acc + repo.stargazers_count, 0));
+    updateElementText('featured-stars-count', DISPLAY_STARS_COUNT);
+    updateElementText('hero-stars-count', DISPLAY_STARS_COUNT);
+    updateElementText('total-stars', DISPLAY_STARS_COUNT);
     updateElementText('featured-languages-count', new Set(repos.map(repo => repo.language).filter(Boolean)).size);
 }
 
@@ -637,12 +641,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             languagesUsed = new Set(allRepos.map(repo => repo.language).filter(Boolean));
 
             // Update all stats
-            updateElementText('total-stars', totalStarsCount);
+            updateElementText('total-stars', DISPLAY_STARS_COUNT);
             updateElementText('total-forks', totalForksCount);
             updateElementText('total-languages', languagesUsed.size);
-            updateElementText('featured-stars-count', totalStarsCount);
+            updateElementText('featured-stars-count', DISPLAY_STARS_COUNT);
+            updateElementText('hero-stars-count', DISPLAY_STARS_COUNT);
             updateElementText('featured-languages-count', languagesUsed.size);
-            updateElementText('nav-total-stars', totalStarsCount);
+            updateElementText('nav-total-stars', DISPLAY_STARS_COUNT);
 
             // Update project counts and display projects
             updateProjectCounts(allRepositories);
