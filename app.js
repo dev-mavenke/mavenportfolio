@@ -1,5 +1,5 @@
 // GitHub username
-const GITHUB_USERNAME = 'BotCoder254';
+const GITHUB_USERNAME = 'dev-mavenke';
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mvzdlzla';
 const DISPLAY_FOLLOWERS_COUNT = 109;
 const DISPLAY_STARS_COUNT = 84;
